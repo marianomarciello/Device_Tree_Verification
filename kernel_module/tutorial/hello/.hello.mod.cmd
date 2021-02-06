@@ -1,0 +1,1 @@
+cmd_/home/nara/Kernel_Hacking/src/kernel_module/hello/hello.mod := { echo  /home/nara/Kernel_Hacking/src/kernel_module/hello/hello.o; echo; } > /home/nara/Kernel_Hacking/src/kernel_module/hello/hello.mod

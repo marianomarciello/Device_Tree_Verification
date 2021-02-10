@@ -8,6 +8,7 @@
 #include <linux/of.h> /* of_find_node_by_name */
 #include <linux/slab.h> /* kmalloc */
 #include <crypto/hash.h>
+#include <linux/printk.h> /* hex_dump_to_buffer */
 
 static ssize_t device_file_read(struct file *, char *, size_t, loff_t *);
 
@@ -58,6 +59,7 @@ static int calc_hash(struct crypto_shash *alg, const unsigned char *data,
 
 void test_hash(struct crypto_shash *alg)
 {
+	/* test hash function with null byte */
 	const u8 *data0 = "\x00\x61\x62\x63\x64";
 	const u8 *data1 = "\x00";
 	const u8 *data2 = "\x00\x61\x62\x63\x64";
@@ -80,30 +82,19 @@ void test_hash(struct crypto_shash *alg)
 	if( strncmp(digest0, digest1, 20) == 0 ) {
 		printk(KERN_NOTICE "data0 == data2 \n");
 	}
-
 }
 
 int print_elem(struct device_node *my_node)
 {
 	struct device_node *my_child;
 	struct property *my_property;
-	unsigned const char *pro_name = "hash";
-	u64 *tmp;
-	int pro_length = sizeof(pro_name);
-	unsigned long tot_size = 0;
 
 	printk(KERN_NOTICE "Find node with name:%s\n", my_node->name);
 	my_property = my_node->properties;
 
 	while(my_property) {
-		tmp = (u64*)my_property->value;
-		if(strncmp(my_property->name, pro_name, pro_length) == 0) {
-			printk(KERN_NOTICE "pro. name: %s\n", my_property->name);
-			printk(KERN_NOTICE "pro. value: %x\n", tmp);
-		} else {
-			printk(KERN_NOTICE "pro. name: %s\n", my_property->name);
-			printk(KERN_NOTICE "pro. value: %x\n", tmp);
-		}
+		printk(KERN_NOTICE "pro. name: %s\n", my_property->name);
+		printk(KERN_NOTICE "pro. value: %s\n", my_property->value);
 		my_property = my_property->next;
 	}
 	
@@ -120,23 +111,107 @@ int print_elem(struct device_node *my_node)
 			printk(KERN_NOTICE "child property name: %s\n",
 				my_property->name);
 
-			tmp = (u64 *)my_property->value;
 			printk(KERN_NOTICE "child property value: 0x%4x\n",
-				tmp);
-			tot_size += sizeof(tmp) + strlen(my_property->name);
+				my_property->value);
 			my_property = my_property->next;
 		}
 		my_child = my_child->child;
 	}
-	printk(KERN_NOTICE "Child byte: %lu\n", tot_size);
+	return 0;
+}
+
+int elem_dimension(struct device_node *my_node)
+{
+	struct device_node *my_child;
+	struct property *my_property;
+	unsigned const char *pro_name = "hash";
+	int pro_length = sizeof(pro_name);
+	unsigned long tot_size = 0;
+
+	my_child = my_node->child;
+
+	
+	if(!my_child) {
+		printk(KERN_NOTICE "%s don't have child member\n", my_node->name);
+		return -1;
+	} 
+
+	while(my_child != NULL) {
+		my_property = my_child->properties;
+		while(my_property != NULL ) {
+			tot_size += strlen(my_property->value) 
+				+ strlen(my_property->name);
+			my_property = my_property->next;
+		}
+		my_child = my_child->child;
+	}
+
+	return tot_size;
+}
+int print_elem_string(struct device_node *my_node, struct crypto_shash *alg,
+			char *hash, int tot_size)
+{
+	struct device_node *my_child;
+	struct property *my_property;
+	unsigned const char *pro_name = "hash";
+	int pro_length = sizeof(pro_name);
+	int rr;
+	char *ret;
+
+	ret = kmalloc(tot_size, GFP_KERNEL); 
+	if(!ret) {
+		printk(KERN_INFO "Error - kmalloc(tot_size)\n");
+		kfree(ret);
+		return -1;
+	}
+
+	printk(KERN_NOTICE "Find node with name:%s\n", my_node->name);
+	my_property = my_node->properties;
+
+	my_child = my_node->child;
+	
+	if(!my_child) {
+		printk(KERN_NOTICE "%s don't have child member\n", my_node->name);
+		kfree(ret);
+		return -1;
+	} 
+
+	while(my_child != NULL) {
+		my_property = my_child->properties;
+		while(my_property != NULL ) {
+			memcpy(ret, my_property->name, strlen(my_property->name));
+			memcpy(ret + strlen(my_property->name), my_property->value,
+				strlen(my_property->value));
+
+			ret = ret + strlen(my_property->value)
+				+strlen(my_property->name);
+			my_property = my_property->next;
+		}
+		my_child = my_child->child;
+		
+	}
+
+	ret = ret - tot_size;
+	printk(KERN_NOTICE "The entire string is %s\n", ret);
+
+	if(!hash) {
+		printk(KERN_NOTICE "Error - kmalloc hash \n");
+		return -1;
+	}
+	rr = calc_hash(alg, ret, strlen(ret), hash);
+	kfree(ret);
 	return 0;
 }
 
 int __init register_device(void)
 {
 	int result = 0;
+	int tot_size = 0;
 	struct device_node *my_node;
+	struct property *dts_property;
 	char *hash_alg_name = "sha1";
+	char *hash, *dts_hash;
+	char *digest;
 	struct crypto_shash *alg;
 
 	/* sha1 */
@@ -147,19 +222,44 @@ int __init register_device(void)
 	}
 
 	test_hash(alg);
-	crypto_free_shash(alg);
 	/* END-sha1 */
 
 	/* DTB node section */
-	my_node = of_find_node_by_name(NULL, "cpus");
-	if(!my_node) {
-		printk(KERN_NOTICE "Error - of_find_node_by_name\n");
+	my_node = of_find_node_by_name(NULL, "test");
+	dts_property = of_find_property(my_node, "hash", 0);
+	dts_hash = kmalloc(sizeof(dts_property->value), GFP_KERNEL);
+	if(!my_node || !dts_hash) {
+		printk(KERN_NOTICE "Error - of_find_node_by_name of_find_property\n");
 		return -1;
 	} 
 
+	dts_hash = dts_property->value;
+
 	/* Dump all element in the subcomponent */
 	print_elem(my_node);
+	tot_size = elem_dimension(my_node);
+	printk(KERN_NOTICE "Size %d\n", tot_size);
+	if (tot_size <= 0) {
+		printk(KERN_NOTICE "Error - negative tot_size\n");
+		return -1;
+	}
+
+	hash = kmalloc(tot_size, GFP_KERNEL);
+	digest = kmalloc(tot_size*2 + 1 , GFP_KERNEL);
+
+	print_elem_string(my_node, alg, hash, tot_size);
+	printk(KERN_NOTICE "Hash value %s\n", hash);
+	hex_dump_to_buffer(hash, tot_size, 32, 2, digest, tot_size*2 + 1, false);
 	printk(KERN_NOTICE "End dtb section \n");
+	printk(KERN_NOTICE "Hash value %s\n", digest);
+	printk(KERN_NOTICE "DTS hash value %s\n", dts_hash);
+	if(strcmp(dts_hash, digest) == 0 ) {
+		printk(KERN_NOTICE "!! Child node verified !!\n");
+	} else {
+		printk(KERN_NOTICE "ALERT!! child node not verified \n");
+	}
+
+	crypto_free_shash(alg);
 	/* end DTB node section */
 
 	printk(KERN_NOTICE "Simple-driver: register_device() is called\n");
@@ -171,7 +271,7 @@ int __init register_device(void)
 	device_file_major_number = result;
 	printk(KERN_NOTICE "Simple-driver: registered character "
 		"device with major number = %i and" 
-		"minor numbers 0..255\n", device_file_major_number);
+		" minor numbers 0..255\n", device_file_major_number);
 	return 0;
 }
 

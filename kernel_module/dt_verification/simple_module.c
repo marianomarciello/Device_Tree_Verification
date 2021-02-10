@@ -26,6 +26,8 @@ struct sdesc {
 	char ctx[];
 };
 
+
+/* init sdesc */
 static struct sdesc *init_sdesc(struct crypto_shash *alg)
 {
 	struct sdesc *sdesc;
@@ -40,6 +42,7 @@ static struct sdesc *init_sdesc(struct crypto_shash *alg)
 	return sdesc;
 }
 
+/* calculate digest using alg function */
 static int calc_hash(struct crypto_shash *alg, const unsigned char *data,
 		unsigned int datalen, unsigned char *digest)
 {
@@ -57,6 +60,7 @@ static int calc_hash(struct crypto_shash *alg, const unsigned char *data,
 	return ret;
 }
 
+/* testing hash function */
 void test_hash(struct crypto_shash *alg)
 {
 	/* test hash function with null byte */
@@ -84,17 +88,29 @@ void test_hash(struct crypto_shash *alg)
 	}
 }
 
+/* print element in the node, and their child */
 int print_elem(struct device_node *my_node)
 {
 	struct device_node *my_child;
 	struct property *my_property;
+	char *buffer;
 
 	printk(KERN_NOTICE "Find node with name:%s\n", my_node->name);
 	my_property = my_node->properties;
 
 	while(my_property) {
 		printk(KERN_NOTICE "pro. name: %s\n", my_property->name);
-		printk(KERN_NOTICE "pro. value: %s\n", my_property->value);
+		buffer = kmalloc(my_property->length*2 + my_property->length, GFP_KERNEL);
+		if (!buffer) {
+			printk(KERN_NOTICE "Error - kmalloc my_property->length\n");
+			return -ENOMEM;
+		}
+		hex_dump_to_buffer(my_property->value, my_property->length, 32, 2,
+			buffer, my_property->length*2 + my_property->length, false); 
+		printk(KERN_NOTICE "pro. value: %s\n", buffer);
+		kfree(buffer);
+
+		printk(KERN_NOTICE "pro. len: %d\n", my_property->length);
 		my_property = my_property->next;
 	}
 	
@@ -111,8 +127,19 @@ int print_elem(struct device_node *my_node)
 			printk(KERN_NOTICE "child property name: %s\n",
 				my_property->name);
 
-			printk(KERN_NOTICE "child property value: 0x%4x\n",
-				my_property->value);
+			buffer = kmalloc(my_property->length*2 + my_property->length, GFP_KERNEL);
+			if (!buffer) {
+				printk(KERN_NOTICE "Error - kmalloc my_property->length\n");
+				return -ENOMEM;
+			}
+			hex_dump_to_buffer(my_property->value, my_property->length, 32, 2,
+				buffer, my_property->length*2 + my_property->length, false); 
+
+			printk(KERN_NOTICE "child property value: %s\n",
+				buffer);
+			kfree(buffer);
+			printk(KERN_NOTICE "child property len: %d\n",
+				my_property->length);
 			my_property = my_property->next;
 		}
 		my_child = my_child->child;
@@ -120,6 +147,7 @@ int print_elem(struct device_node *my_node)
 	return 0;
 }
 
+/* get byte in the name:value child node */
 int elem_dimension(struct device_node *my_node)
 {
 	struct device_node *my_child;
@@ -148,6 +176,8 @@ int elem_dimension(struct device_node *my_node)
 
 	return tot_size;
 }
+
+/* print element (only for string value) */
 int print_elem_string(struct device_node *my_node, struct crypto_shash *alg,
 			char *hash, int tot_size)
 {
@@ -203,6 +233,7 @@ int print_elem_string(struct device_node *my_node, struct crypto_shash *alg,
 	return 0;
 }
 
+/* Register device init function, done when insmod module.ko*/
 int __init register_device(void)
 {
 	int result = 0;
@@ -248,10 +279,13 @@ int __init register_device(void)
 	digest = kmalloc(tot_size*2 + 1 , GFP_KERNEL);
 
 	print_elem_string(my_node, alg, hash, tot_size);
-	printk(KERN_NOTICE "Hash value %s\n", hash);
-	hex_dump_to_buffer(hash, tot_size, 32, 2, digest, tot_size*2 + 1, false);
+
+	/* output hex of digest value */
+	hex_dump_to_buffer(hash, tot_size, 32, 2, digest, tot_size*2 - 1 , false);
 	printk(KERN_NOTICE "End dtb section \n");
 	printk(KERN_NOTICE "Hash value %s\n", digest);
+	printk(KERN_NOTICE "Hash len %d\n", strlen(digest));
+	printk(KERN_NOTICE "DTS hash len %d\n", strlen(dts_hash));
 	printk(KERN_NOTICE "DTS hash value %s\n", dts_hash);
 	if(strcmp(dts_hash, digest) == 0 ) {
 		printk(KERN_NOTICE "!! Child node verified !!\n");
@@ -260,6 +294,9 @@ int __init register_device(void)
 	}
 
 	crypto_free_shash(alg);
+
+	my_node = of_find_node_by_name(NULL, "cpus");
+	print_elem(my_node);
 	/* end DTB node section */
 
 	printk(KERN_NOTICE "Simple-driver: register_device() is called\n");
@@ -275,6 +312,7 @@ int __init register_device(void)
 	return 0;
 }
 
+/* last function when rmmod module.ko */
 void __exit unregister_device(void)
 {
 	printk(KERN_NOTICE "Simple-driver: unregister_device() is called\n");
@@ -282,6 +320,7 @@ void __exit unregister_device(void)
 		unregister_chrdev(device_file_major_number, device_name);
 }
 
+/* Char device function */
 static const char g_s_Hello_World_string[] = "Hello world from kernel mode!\n\0";
 static const ssize_t g_s_Hello_World_size = sizeof(g_s_Hello_World_string);
 static ssize_t device_file_read( struct file *file_ptr, char __user *user_buffer,

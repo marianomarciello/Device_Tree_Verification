@@ -88,6 +88,93 @@ void test_hash(struct crypto_shash *alg)
 	}
 }
 
+/* print element in the node, and their child */
+int print_elem(struct device_node *my_node)
+{
+	struct device_node *my_child;
+	struct property *my_property;
+	char *buffer;
+
+	printk(KERN_NOTICE "Find node with name:%s\n", my_node->name);
+	my_property = my_node->properties;
+
+	while(my_property) {
+		printk(KERN_NOTICE "pro. name: %s\n", my_property->name);
+		buffer = kmalloc(my_property->length*2 + my_property->length, GFP_KERNEL);
+		if (!buffer) {
+			printk(KERN_NOTICE "Error - kmalloc my_property->length\n");
+			return -ENOMEM;
+		}
+		hex_dump_to_buffer(my_property->value, my_property->length, 32, 2,
+			buffer, my_property->length*2 + my_property->length, false); 
+		printk(KERN_NOTICE "pro. value: %s\n", buffer);
+		kfree(buffer);
+
+		printk(KERN_NOTICE "pro. len: %d\n", my_property->length);
+		my_property = my_property->next;
+	}
+	
+	my_child = my_node->child;
+
+	
+	if(!my_child) {
+		printk(KERN_NOTICE "%s don't have child member\n", my_node->name);
+	} 
+	while(my_child != NULL) {
+		printk(KERN_NOTICE "child node with name: %s\n", my_child->name);
+		my_property = my_child->properties;
+		while(my_property != NULL ) {
+			printk(KERN_NOTICE "child property name: %s\n",
+				my_property->name);
+
+			buffer = kmalloc(my_property->length*2 + my_property->length, GFP_KERNEL);
+			if (!buffer) {
+				printk(KERN_NOTICE "Error - kmalloc my_property->length\n");
+				return -ENOMEM;
+			}
+			hex_dump_to_buffer(my_property->value, my_property->length, 32, 2,
+				buffer, my_property->length*2 + my_property->length, false); 
+
+			printk(KERN_NOTICE "child property value: %s\n",
+				buffer);
+			kfree(buffer);
+			printk(KERN_NOTICE "child property len: %d\n",
+				my_property->length);
+			my_property = my_property->next;
+		}
+		my_child = my_child->child;
+	}
+	return 0;
+}
+
+/* get byte in the name:value child node */
+int elem_dimension(struct device_node *my_node)
+{
+	struct device_node *my_child;
+	struct property *my_property;
+	unsigned long tot_size = 0;
+
+	my_child = my_node->child;
+
+	
+	if(!my_child) {
+		printk(KERN_NOTICE "%s don't have child member\n", my_node->name);
+		return -1;
+	} 
+
+	while(my_child != NULL) {
+		my_property = my_child->properties;
+		while(my_property != NULL ) {
+			tot_size += strlen(my_property->value) 
+				+ strlen(my_property->name);
+			my_property = my_property->next;
+		}
+		my_child = my_child->child;
+	}
+
+	return tot_size;
+}
+
 /* get byte in the name:value child node (hex)*/
 int hex_elem_dimension(struct device_node *my_node)
 {
@@ -116,10 +203,8 @@ int hex_elem_dimension(struct device_node *my_node)
 			}
 			hex_dump_to_buffer(my_property->value, 
 				my_property->length, 32, 2,
-				buffer, my_property->length*2 + my_property->length,
+				buffer, my_property->length*2 + 1,
 				false); 
-			printk(KERN_NOTICE "Buffer %s\n",buffer);
-			printk(KERN_NOTICE "Name %s\n",my_property->name);
 			tot_size += strlen(buffer) 
 				+ strlen(my_property->name);
 			my_property = my_property->next;
@@ -131,6 +216,59 @@ int hex_elem_dimension(struct device_node *my_node)
 	return tot_size;
 }
 
+/* print element (only for string value) */
+int print_elem_string(struct device_node *my_node, struct crypto_shash *alg,
+			char *hash, int tot_size)
+{
+	struct device_node *my_child;
+	struct property *my_property;
+	int rr;
+	char *ret;
+
+	ret = kmalloc(tot_size, GFP_KERNEL); 
+	if(!ret) {
+		printk(KERN_INFO "Error - kmalloc(tot_size)\n");
+		kfree(ret);
+		return -1;
+	}
+
+	printk(KERN_NOTICE "Find node with name:%s\n", my_node->name);
+	my_property = my_node->properties;
+
+	my_child = my_node->child;
+	
+	if(!my_child) {
+		printk(KERN_NOTICE "%s don't have child member\n", my_node->name);
+		kfree(ret);
+		return -1;
+	} 
+
+	while(my_child != NULL) {
+		my_property = my_child->properties;
+		while(my_property != NULL ) {
+			memcpy(ret, my_property->name, strlen(my_property->name));
+			memcpy(ret + strlen(my_property->name), my_property->value,
+				strlen(my_property->value));
+
+			ret = ret + strlen(my_property->value)
+				+strlen(my_property->name);
+			my_property = my_property->next;
+		}
+		my_child = my_child->child;
+		
+	}
+
+	ret = ret - tot_size;
+	printk(KERN_NOTICE "The entire string is %s\n", ret);
+
+	if(!hash) {
+		printk(KERN_NOTICE "Error - kmalloc hash \n");
+		return -1;
+	}
+	rr = calc_hash(alg, ret, strlen(ret), hash);
+	kfree(ret);
+	return 0;
+}
 /* print element (hex value ) */
 int hex_print_elem_string(struct device_node *my_node, struct crypto_shash *alg,
 			char *hash, int tot_size)
@@ -139,8 +277,10 @@ int hex_print_elem_string(struct device_node *my_node, struct crypto_shash *alg,
 	struct property *my_property;
 	int rr;
 	char *ret, *buffer;
+	char *tmp;
 
-	ret = kmalloc(tot_size*2, GFP_KERNEL); 
+	ret = kmalloc(tot_size, GFP_KERNEL); 
+	tmp = ret;
 	if(!ret) {
 		printk(KERN_INFO "HEX: Error - kmalloc(tot_size)\n");
 		kfree(ret);
@@ -162,7 +302,7 @@ int hex_print_elem_string(struct device_node *my_node, struct crypto_shash *alg,
 		my_property = my_child->properties;
 
 		while(my_property != NULL ) {
-			buffer = kmalloc(my_property->length + 1,
+			buffer = kmalloc(my_property->length*2 + my_property->length,
 					GFP_KERNEL);
 			if (!buffer) {
 				printk(KERN_NOTICE 
@@ -171,12 +311,13 @@ int hex_print_elem_string(struct device_node *my_node, struct crypto_shash *alg,
 			}
 			hex_dump_to_buffer(my_property->value, 
 				my_property->length, 32, 2,
-				buffer, my_property->length*2 + my_property->length,
+				buffer, my_property->length*2 + 1,
 				false); 
 
 			memcpy(ret, my_property->name, strlen(my_property->name));
+			printk(KERN_NOTICE "Buffer %s\n",buffer);
 			memcpy(ret + strlen(my_property->name), buffer,
-				strlen(buffer)+1);
+				strlen(buffer));
 
 			ret = ret + strlen(buffer) + strlen(my_property->name);
 
@@ -188,14 +329,14 @@ int hex_print_elem_string(struct device_node *my_node, struct crypto_shash *alg,
 	}
 	
 	ret = ret - tot_size;
-	printk(KERN_NOTICE "HEX: The entire string is [%s]\n", ret);
+	printk(KERN_NOTICE "HEX: The entire string is %s\n", ret);
 	printk(KERN_NOTICE "HEX: The entire len is %d\n", strlen(ret));
 
 	if(!hash) {
 		printk(KERN_NOTICE "Error - kmalloc hash \n");
 		return -1;
 	}
-	rr = calc_hash(alg, ret, strlen(ret), hash);
+	rr = calc_hash(alg, tmp, strlen(tmp), hash);
 	kfree(ret);
 	return 0;
 }
@@ -218,10 +359,50 @@ int __init register_device(void)
 		printk(KERN_NOTICE "Error - crypto_alloc_shash\n");
 		return -1;
 	}
+
 	//test_hash(alg);
 	/* END-sha1 */
 
 	/* DTB node section */
+	my_node = of_find_node_by_name(NULL, "test");
+	dts_property = of_find_property(my_node, "hash", 0);
+	if(!my_node ) {
+		printk(KERN_NOTICE "Error - of_find_node_by_name of_find_property\n");
+		return -1;
+	} 
+
+	dts_hash = dts_property->value;
+
+	/* Dump all element in the subcomponent */
+	//print_elem(my_node);
+	tot_size = elem_dimension(my_node);
+	printk(KERN_NOTICE "Size %d\n", tot_size);
+	if (tot_size <= 0) {
+		printk(KERN_NOTICE "Error - negative tot_size\n");
+		return -1;
+	}
+
+	hash = kmalloc(tot_size, GFP_KERNEL);
+	digest = kmalloc(tot_size*2 + 1 , GFP_KERNEL);
+
+	print_elem_string(my_node, alg, hash, tot_size);
+
+	/* output hex of digest value */
+	hex_dump_to_buffer(hash, tot_size, 32, 2, digest, tot_size*2 - 1 , false);
+	printk(KERN_NOTICE "End dtb section \n");
+	printk(KERN_NOTICE "Hash value %s\n", digest);
+	printk(KERN_NOTICE "Hash len %d\n", strlen(digest));
+	printk(KERN_NOTICE "DTS hash len %d\n", strlen(dts_hash));
+	printk(KERN_NOTICE "DTS hash value %s\n", dts_hash);
+	if(strcmp(dts_hash, digest) == 0 ) {
+		printk(KERN_NOTICE "!! Child node verified !!\n");
+	} else {
+		printk(KERN_NOTICE "ALERT!! child node not verified \n");
+	}
+
+	kfree(digest);
+	kfree(hash);
+	/* not string verification */
 	my_node = of_find_node_by_name(NULL, "cpus");
 	dts_property = of_find_property(my_node, "hash", 0);
 	if(!my_node ) {

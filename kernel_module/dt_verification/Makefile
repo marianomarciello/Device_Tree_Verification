@@ -1,4 +1,4 @@
-obj-m +=simple_module.o
+obj-m +=dtb_verification.o
 KERNEL := '/home/nara/Kernel_Hacking/joakim_env/linux'
 
 all:

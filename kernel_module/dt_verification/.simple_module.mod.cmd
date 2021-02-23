@@ -1,1 +1,0 @@
-cmd_/home/nara/Kernel_Hacking/src/kernel_module/dt_verification/simple_module.mod := { echo  /home/nara/Kernel_Hacking/src/kernel_module/dt_verification/simple_module.o; echo; } > /home/nara/Kernel_Hacking/src/kernel_module/dt_verification/simple_module.mod

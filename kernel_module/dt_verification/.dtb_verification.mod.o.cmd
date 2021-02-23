@@ -1,8 +1,10 @@
-cmd_/home/nara/Kernel_Hacking/src/kernel_module/dt_verification/simple_module.o := /home/nara/Kernel_Hacking/joakim_env/toolchains/aarch64/bin/aarch64-none-linux-gnu-gcc -Wp,-MMD,/home/nara/Kernel_Hacking/src/kernel_module/dt_verification/.simple_module.o.d -nostdinc -isystem /home/nara/Kernel_Hacking/joakim_env/toolchains/aarch64/bin/../lib/gcc/aarch64-none-linux-gnu/9.2.1/include -I./arch/arm64/include -I./arch/arm64/include/generated  -I./include -I./arch/arm64/include/uapi -I./arch/arm64/include/generated/uapi -I./include/uapi -I./include/generated/uapi -include ./include/linux/kconfig.h -include ./include/linux/compiler_types.h -D__KERNEL__ -mlittle-endian -DKASAN_SHADOW_SCALE_SHIFT=3 -Wall -Wundef -Werror=strict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -fshort-wchar -fno-PIE -Werror=implicit-function-declaration -Werror=implicit-int -Wno-format-security -std=gnu89 -mgeneral-regs-only -DCONFIG_CC_HAS_K_CONSTRAINT=1 -fno-asynchronous-unwind-tables -Wno-psabi -mabi=lp64 -mbranch-protection=pac-ret+leaf -Wa,-march=armv8.4-a -DARM64_ASM_ARCH='"armv8.4-a"' -DKASAN_SHADOW_SCALE_SHIFT=3 -fno-delete-null-pointer-checks -Wno-frame-address -Wno-format-truncation -Wno-format-overflow -Wno-address-of-packed-member -O2 --param=allow-store-data-races=0 -Wframe-larger-than=2048 -fstack-protector-strong -Wno-unused-but-set-variable -Wimplicit-fallthrough -Wno-unused-const-variable -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-var-tracking-assignments -g -Wdeclaration-after-statement -Wvla -Wno-pointer-sign -Wno-stringop-truncation -Wno-array-bounds -Wno-stringop-overflow -Wno-restrict -Wno-maybe-uninitialized -fno-strict-overflow -fno-merge-all-constants -fmerge-constants -fno-stack-check -fconserve-stack -Werror=date-time -Werror=incompatible-pointer-types -Werror=designated-init -fmacro-prefix-map=./= -Wno-packed-not-aligned -mstack-protector-guard=sysreg -mstack-protector-guard-reg=sp_el0 -mstack-protector-guard-offset=1136  -DMODULE  -DKBUILD_BASENAME='"simple_module"' -DKBUILD_MODNAME='"simple_module"' -c -o /home/nara/Kernel_Hacking/src/kernel_module/dt_verification/simple_module.o /home/nara/Kernel_Hacking/src/kernel_module/dt_verification/simple_module.c
+cmd_/home/nara/Kernel_Hacking/src/kernel_module/dt_verification/dtb_verification.mod.o := /home/nara/Kernel_Hacking/joakim_env/toolchains/aarch64/bin/aarch64-none-linux-gnu-gcc -Wp,-MMD,/home/nara/Kernel_Hacking/src/kernel_module/dt_verification/.dtb_verification.mod.o.d -nostdinc -isystem /home/nara/Kernel_Hacking/joakim_env/toolchains/aarch64/bin/../lib/gcc/aarch64-none-linux-gnu/9.2.1/include -I./arch/arm64/include -I./arch/arm64/include/generated  -I./include -I./arch/arm64/include/uapi -I./arch/arm64/include/generated/uapi -I./include/uapi -I./include/generated/uapi -include ./include/linux/kconfig.h -include ./include/linux/compiler_types.h -D__KERNEL__ -mlittle-endian -DKASAN_SHADOW_SCALE_SHIFT=3 -Wall -Wundef -Werror=strict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -fshort-wchar -fno-PIE -Werror=implicit-function-declaration -Werror=implicit-int -Wno-format-security -std=gnu89 -mgeneral-regs-only -DCONFIG_CC_HAS_K_CONSTRAINT=1 -fno-asynchronous-unwind-tables -Wno-psabi -mabi=lp64 -mbranch-protection=pac-ret+leaf -Wa,-march=armv8.4-a -DARM64_ASM_ARCH='"armv8.4-a"' -DKASAN_SHADOW_SCALE_SHIFT=3 -fno-delete-null-pointer-checks -Wno-frame-address -Wno-format-truncation -Wno-format-overflow -Wno-address-of-packed-member -O2 --param=allow-store-data-races=0 -Wframe-larger-than=2048 -fstack-protector-strong -Wno-unused-but-set-variable -Wimplicit-fallthrough -Wno-unused-const-variable -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-var-tracking-assignments -g -Wdeclaration-after-statement -Wvla -Wno-pointer-sign -Wno-stringop-truncation -Wno-array-bounds -Wno-stringop-overflow -Wno-restrict -Wno-maybe-uninitialized -fno-strict-overflow -fno-merge-all-constants -fmerge-constants -fno-stack-check -fconserve-stack -Werror=date-time -Werror=incompatible-pointer-types -Werror=designated-init -fmacro-prefix-map=./= -Wno-packed-not-aligned -mstack-protector-guard=sysreg -mstack-protector-guard-reg=sp_el0 -mstack-protector-guard-offset=1136  -DMODULE  -DKBUILD_BASENAME='"dtb_verification.mod"' -DKBUILD_MODNAME='"dtb_verification"' -c -o /home/nara/Kernel_Hacking/src/kernel_module/dt_verification/dtb_verification.mod.o /home/nara/Kernel_Hacking/src/kernel_module/dt_verification/dtb_verification.mod.c
 
-source_/home/nara/Kernel_Hacking/src/kernel_module/dt_verification/simple_module.o := /home/nara/Kernel_Hacking/src/kernel_module/dt_verification/simple_module.c
+source_/home/nara/Kernel_Hacking/src/kernel_module/dt_verification/dtb_verification.mod.o := /home/nara/Kernel_Hacking/src/kernel_module/dt_verification/dtb_verification.mod.c
 
-deps_/home/nara/Kernel_Hacking/src/kernel_module/dt_verification/simple_module.o := \
+deps_/home/nara/Kernel_Hacking/src/kernel_module/dt_verification/dtb_verification.mod.o := \
+    $(wildcard include/config/module/unload.h) \
+    $(wildcard include/config/retpoline.h) \
   include/linux/kconfig.h \
     $(wildcard include/config/cc/version/text.h) \
     $(wildcard include/config/cpu/big/endian.h) \
@@ -14,44 +16,8 @@ deps_/home/nara/Kernel_Hacking/src/kernel_module/dt_verification/simple_module.o
     $(wildcard include/config/cc/has/asm/inline.h) \
   include/linux/compiler_attributes.h \
   include/linux/compiler-gcc.h \
-    $(wildcard include/config/retpoline.h) \
     $(wildcard include/config/arch/use/builtin/bswap.h) \
   arch/arm64/include/asm/compiler.h \
-  include/linux/init.h \
-    $(wildcard include/config/have/arch/prel32/relocations.h) \
-    $(wildcard include/config/strict/kernel/rwx.h) \
-    $(wildcard include/config/strict/module/rwx.h) \
-  include/linux/compiler.h \
-    $(wildcard include/config/trace/branch/profiling.h) \
-    $(wildcard include/config/profile/all/branches.h) \
-    $(wildcard include/config/stack/validation.h) \
-  include/linux/compiler_types.h \
-  arch/arm64/include/generated/asm/rwonce.h \
-  include/asm-generic/rwonce.h \
-  include/linux/kasan-checks.h \
-    $(wildcard include/config/kasan.h) \
-  include/linux/types.h \
-    $(wildcard include/config/have/uid16.h) \
-    $(wildcard include/config/uid16.h) \
-    $(wildcard include/config/arch/dma/addr/t/64bit.h) \
-    $(wildcard include/config/phys/addr/t/64bit.h) \
-    $(wildcard include/config/64bit.h) \
-  include/uapi/linux/types.h \
-  arch/arm64/include/generated/uapi/asm/types.h \
-  include/uapi/asm-generic/types.h \
-  include/asm-generic/int-ll64.h \
-  include/uapi/asm-generic/int-ll64.h \
-  arch/arm64/include/uapi/asm/bitsperlong.h \
-  include/asm-generic/bitsperlong.h \
-  include/uapi/asm-generic/bitsperlong.h \
-  include/uapi/linux/posix_types.h \
-  include/linux/stddef.h \
-  include/uapi/linux/stddef.h \
-  arch/arm64/include/uapi/asm/posix_types.h \
-  include/uapi/asm-generic/posix_types.h \
-  include/linux/kcsan-checks.h \
-    $(wildcard include/config/kcsan.h) \
-    $(wildcard include/config/kcsan/ignore/atomics.h) \
   include/linux/module.h \
     $(wildcard include/config/modules.h) \
     $(wildcard include/config/sysfs.h) \
@@ -70,11 +36,30 @@ deps_/home/nara/Kernel_Hacking/src/kernel_module/dt_verification/simple_module.o
     $(wildcard include/config/event/tracing.h) \
     $(wildcard include/config/ftrace/mcount/record.h) \
     $(wildcard include/config/kprobes.h) \
-    $(wildcard include/config/module/unload.h) \
     $(wildcard include/config/constructors.h) \
     $(wildcard include/config/function/error/injection.h) \
   include/linux/list.h \
     $(wildcard include/config/debug/list.h) \
+  include/linux/types.h \
+    $(wildcard include/config/have/uid16.h) \
+    $(wildcard include/config/uid16.h) \
+    $(wildcard include/config/arch/dma/addr/t/64bit.h) \
+    $(wildcard include/config/phys/addr/t/64bit.h) \
+    $(wildcard include/config/64bit.h) \
+  include/uapi/linux/types.h \
+  arch/arm64/include/generated/uapi/asm/types.h \
+  include/uapi/asm-generic/types.h \
+  include/asm-generic/int-ll64.h \
+  include/uapi/asm-generic/int-ll64.h \
+  arch/arm64/include/uapi/asm/bitsperlong.h \
+  include/asm-generic/bitsperlong.h \
+  include/uapi/asm-generic/bitsperlong.h \
+  include/uapi/linux/posix_types.h \
+  include/linux/stddef.h \
+  include/uapi/linux/stddef.h \
+  include/linux/compiler_types.h \
+  arch/arm64/include/uapi/asm/posix_types.h \
+  include/uapi/asm-generic/posix_types.h \
   include/linux/poison.h \
     $(wildcard include/config/illegal/pointer/value.h) \
     $(wildcard include/config/page/poisoning/zero.h) \
@@ -97,7 +82,19 @@ deps_/home/nara/Kernel_Hacking/src/kernel_module/dt_verification/simple_module.o
   include/linux/export.h \
     $(wildcard include/config/modversions.h) \
     $(wildcard include/config/module/rel/crcs.h) \
+    $(wildcard include/config/have/arch/prel32/relocations.h) \
     $(wildcard include/config/trim/unused/ksyms.h) \
+  include/linux/compiler.h \
+    $(wildcard include/config/trace/branch/profiling.h) \
+    $(wildcard include/config/profile/all/branches.h) \
+    $(wildcard include/config/stack/validation.h) \
+  arch/arm64/include/generated/asm/rwonce.h \
+  include/asm-generic/rwonce.h \
+  include/linux/kasan-checks.h \
+    $(wildcard include/config/kasan.h) \
+  include/linux/kcsan-checks.h \
+    $(wildcard include/config/kcsan.h) \
+    $(wildcard include/config/kcsan/ignore/atomics.h) \
   arch/arm64/include/asm/linkage.h \
     $(wildcard include/config/arm64/bti/kernel.h) \
   include/linux/bitops.h \
@@ -135,6 +132,9 @@ deps_/home/nara/Kernel_Hacking/src/kernel_module/dt_verification/simple_module.o
   arch/arm64/include/asm/alternative.h \
     $(wildcard include/config/arm64/uao.h) \
   arch/arm64/include/asm/cpucaps.h \
+  include/linux/init.h \
+    $(wildcard include/config/strict/kernel/rwx.h) \
+    $(wildcard include/config/strict/module/rwx.h) \
   arch/arm64/include/asm/atomic_lse.h \
   include/linux/atomic-arch-fallback.h \
     $(wildcard include/config/generic/atomic64.h) \
@@ -811,34 +811,13 @@ deps_/home/nara/Kernel_Hacking/src/kernel_module/dt_verification/simple_module.o
     $(wildcard include/config/have/mod/arch/specific.h) \
     $(wildcard include/config/modules/use/elf/rel.h) \
     $(wildcard include/config/modules/use/elf/rela.h) \
-  include/linux/of.h \
-    $(wildcard include/config/of/dynamic.h) \
-    $(wildcard include/config/sparc.h) \
-    $(wildcard include/config/of/promtree.h) \
-    $(wildcard include/config/of/kobj.h) \
-    $(wildcard include/config/of.h) \
-    $(wildcard include/config/of/numa.h) \
-    $(wildcard include/config/of/overlay.h) \
-  include/linux/mod_devicetable.h \
-  include/linux/property.h \
-  include/linux/fwnode.h \
-  include/linux/slab.h \
-    $(wildcard include/config/debug/slab.h) \
-    $(wildcard include/config/failslab.h) \
-    $(wildcard include/config/have/hardened/usercopy/allocator.h) \
-    $(wildcard include/config/slab.h) \
-    $(wildcard include/config/slub.h) \
-    $(wildcard include/config/slob.h) \
-  include/linux/overflow.h \
-  include/linux/percpu-refcount.h \
-  include/linux/kasan.h \
-    $(wildcard include/config/kasan/vmalloc.h) \
-    $(wildcard include/config/kasan/generic.h) \
-    $(wildcard include/config/kasan/inline.h) \
-  include/crypto/hash.h \
-  include/linux/crypto.h \
-    $(wildcard include/config/crypto/stats.h) \
+  include/linux/build-salt.h \
+    $(wildcard include/config/build/salt.h) \
+  include/linux/elfnote.h \
+  include/linux/vermagic.h \
+  include/generated/utsrelease.h \
+  arch/arm64/include/asm/vermagic.h \
 
-/home/nara/Kernel_Hacking/src/kernel_module/dt_verification/simple_module.o: $(deps_/home/nara/Kernel_Hacking/src/kernel_module/dt_verification/simple_module.o)
+/home/nara/Kernel_Hacking/src/kernel_module/dt_verification/dtb_verification.mod.o: $(deps_/home/nara/Kernel_Hacking/src/kernel_module/dt_verification/dtb_verification.mod.o)
 
-$(deps_/home/nara/Kernel_Hacking/src/kernel_module/dt_verification/simple_module.o):
+$(deps_/home/nara/Kernel_Hacking/src/kernel_module/dt_verification/dtb_verification.mod.o):

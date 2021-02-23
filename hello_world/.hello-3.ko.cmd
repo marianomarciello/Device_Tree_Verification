@@ -1,1 +1,0 @@
-cmd_/home/nara/Kernel_Hacking/doc/src/hello_world/hello-3.ko := ld -r -m elf_x86_64 --build-id=sha1  -T ./scripts/module-common.lds -o /home/nara/Kernel_Hacking/doc/src/hello_world/hello-3.ko /home/nara/Kernel_Hacking/doc/src/hello_world/hello-3.o /home/nara/Kernel_Hacking/doc/src/hello_world/hello-3.mod.o;  true

@@ -1,1 +1,0 @@
-cmd_/home/nara/Kernel_Hacking/src/kernel_module/dt_verification/dtb_verification.mod := { echo  /home/nara/Kernel_Hacking/src/kernel_module/dt_verification/dtb_verification.o; echo; } > /home/nara/Kernel_Hacking/src/kernel_module/dt_verification/dtb_verification.mod

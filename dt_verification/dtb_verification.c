@@ -130,7 +130,6 @@ int hex_print_elem_string(struct device_node *my_node, struct crypto_shash *alg,
 	struct property *my_property;
 	int rr;
 	char *ret, *buffer;
-	char *fine = "\0";
 
 	ret = kmalloc(tot_size*2, GFP_KERNEL); 
 	if(!ret) {
@@ -176,7 +175,7 @@ int hex_print_elem_string(struct device_node *my_node, struct crypto_shash *alg,
 		
 	}
 	
-	strcpy( ret, fine);
+	strcpy(ret, "\0");
 	ret = ret - tot_size;
 	rr = calc_hash(alg, ret, strlen(ret), hash);
 

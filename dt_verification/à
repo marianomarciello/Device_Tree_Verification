@@ -70,8 +70,7 @@ static int calc_hash(struct crypto_shash *alg, const unsigned char *data,
 
 
 /**
- * hex_elem_dimension - count number of byte in the node as namevalue char 
- * array.
+ * hex_elem_dimension - count number of byte in the node as namevalue char array.
  * @my_node: device tree node element
  * Return: number of byte counted on success, <0 if an error occurred.
  */
@@ -86,8 +85,7 @@ int hex_elem_dimension(struct device_node *my_node)
 
 	
 	if(!my_child) {
-		printk(KERN_NOTICE "%s don't have child member\n",
-			my_node->name);
+		printk(KERN_NOTICE "%s don't have child member\n", my_node->name);
 		return -1;
 	} 
 
@@ -95,23 +93,21 @@ int hex_elem_dimension(struct device_node *my_node)
 		my_property = my_child->properties;
 		while(my_property != NULL ) {
 			if(my_property->length && my_property->length > 0) {
-				buffer = kmalloc(my_property->length*2 
-					+ my_property->length,
+				buffer = kmalloc(my_property->length*2 + my_property->length,
 						GFP_KERNEL);
 				if (!buffer) {
 					printk(KERN_NOTICE 
-						"Error - kmalloc "
-						"my_property->length\n");
+						"Error - kmalloc my_property->length\n");
 					return -ENOMEM;
 				}
 				/* property with value */
 				hex_dump_to_buffer(my_property->value, 
 					my_property->length, 32, 2,
-					buffer, my_property->length*2 
-					+ my_property->length,
+					buffer, my_property->length*2 + my_property->length,
 					false); 
 				tot_size += strlen(buffer) 
 					+ strlen(my_property->name);
+				kfree(buffer);
 			}else {
 				tot_size += strlen(my_property->name);
 			}
@@ -120,8 +116,6 @@ int hex_elem_dimension(struct device_node *my_node)
 		my_child = my_child->child;
 	}
 
-	if(buffer)
-		kfree(buffer);
 	return tot_size;
 }
 
@@ -142,7 +136,7 @@ int hex_print_elem_string(struct device_node *my_node, struct crypto_shash *alg,
 	int rr;
 	char *ret, *buffer;
 
-	ret = kmalloc(tot_size, GFP_KERNEL); 
+	ret = kmalloc(tot_size*2, GFP_KERNEL); 
 	if(!ret) {
 		printk(KERN_INFO "HEX: Error - kmalloc(tot_size)\n");
 		return -ENOMEM;
@@ -152,8 +146,7 @@ int hex_print_elem_string(struct device_node *my_node, struct crypto_shash *alg,
 	my_child = my_node->child;
 	
 	if(!my_child) {
-		printk(KERN_NOTICE "HEX: %s don't have "
-			"child member\n", my_node->name);
+		printk(KERN_NOTICE "HEX: %s don't have child member\n", my_node->name);
 		kfree(ret);
 		return -ENODATA;
 	} 
@@ -163,47 +156,37 @@ int hex_print_elem_string(struct device_node *my_node, struct crypto_shash *alg,
 
 		while(my_property != NULL ) {
 			if(my_property->length && my_property->length > 0) {
-				buffer = kmalloc(my_property->length*2 +
-					my_property->length,
+				buffer = kmalloc(my_property->length*2 + my_property->length,
 						GFP_KERNEL);
 				if (!buffer) {
 					printk(KERN_NOTICE 
-						"HEX: Error - kmalloc "
-						"my_property->length\n");
+						"HEX: Error - kmalloc my_property->length\n");
 					return -ENOMEM;
 				}
 				hex_dump_to_buffer(my_property->value, 
 					my_property->length, 32, 2,
-					buffer, my_property->length*2 + 
-						my_property->length,
+					buffer, my_property->length*2 + my_property->length,
 					false); 
 
-				memcpy(ret, my_property->name, 
-					strlen(my_property->name));
-				memcpy(ret + strlen(my_property->name),
-					buffer,
+				memcpy(ret, my_property->name, strlen(my_property->name));
+				memcpy(ret + strlen(my_property->name), buffer,
 					strlen(buffer));
 
-				ret = ret + strlen(buffer) + 
-					strlen(my_property->name);
+				ret = ret + strlen(buffer) + strlen(my_property->name);
+				kfree(buffer);
 			} else {
-				memcpy(ret, my_property->name, 
-					strlen(my_property->name));
+				memcpy(ret, my_property->name, strlen(my_property->name));
 				ret = ret + strlen(my_property->name);
 			}
 
 			my_property = my_property->next;
 		}
 		my_child = my_child->child;
-
-		if(buffer)
-			kfree(buffer);
 		
 	}
 	
-	strcpy(ret, "\0");
+	strcat(ret, "\0");
 	ret = ret - tot_size;
-
 	rr = calc_hash(alg, ret, strlen(ret), hash);
 
 	kfree(ret);
@@ -265,8 +248,7 @@ int verify(struct device_node *my_node, struct crypto_shash *alg)
 	}
 
 	
-	ret = hex_dump_to_buffer(hash, SHA1_DIGEST_SIZE, 32, 2, digest, 
-		tot_size, false);
+	ret = hex_dump_to_buffer(hash, SHA1_DIGEST_SIZE, 32, 2, digest, tot_size, false);
 
 	if(ret != strlen(digest)) {
 		printk(KERN_NOTICE "Error - hex_dump_to_buffer\n");

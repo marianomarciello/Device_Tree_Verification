@@ -94,7 +94,7 @@ int hex_elem_dimension(struct device_node *my_node)
 	while(my_child != NULL) {
 		my_property = my_child->properties;
 		while(my_property != NULL ) {
-			if(my_property->length && my_property->length > 0) {
+			if(my_property->length > 0) {
 				buffer = kmalloc(my_property->length*2 
 					+ my_property->length,
 						GFP_KERNEL);
@@ -162,7 +162,7 @@ int hex_print_elem_string(struct device_node *my_node, struct crypto_shash *alg,
 		my_property = my_child->properties;
 
 		while(my_property != NULL ) {
-			if(my_property->length && my_property->length > 0) {
+			if(my_property->length > 0) {
 				buffer = kmalloc(my_property->length*2 +
 					my_property->length,
 						GFP_KERNEL);

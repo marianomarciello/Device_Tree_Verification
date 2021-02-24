@@ -1,1 +1,0 @@
-cmd_/home/nara/Kernel_Hacking/kernel_module/Module.symvers := sed 's/ko$$/o/' /home/nara/Kernel_Hacking/kernel_module/modules.order | scripts/mod/modpost     -o /home/nara/Kernel_Hacking/kernel_module/Module.symvers -e -i Module.symvers   -T -

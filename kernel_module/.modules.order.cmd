@@ -1,1 +1,0 @@
-cmd_/home/nara/Kernel_Hacking/kernel_module/modules.order := {   echo /home/nara/Kernel_Hacking/kernel_module/hello.ko; :; } | awk '!x[$$0]++' - > /home/nara/Kernel_Hacking/kernel_module/modules.order

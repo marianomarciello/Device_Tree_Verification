@@ -37,19 +37,19 @@ $ make run-netboot
 
 execute the following command on **U-boot**
 ```bash
-$ tftp ${fdt_addr} ${serverip}:correct.dtb;
+=> tftp ${fdt_addr} ${serverip}:correct.dtb;
 ```
 
 or
 
 ```bash
-$ tftp ${fdt_addr} ${serverip}:incorrect.dtb;
+=> tftp ${fdt_addr} ${serverip}:incorrect.dtb;
 ```
 
 and then:
 
 ```bash
-$ run nbr
+=> run nbr
 ```
 
 ## Load module

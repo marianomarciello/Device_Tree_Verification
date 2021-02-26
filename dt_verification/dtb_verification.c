@@ -84,7 +84,6 @@ int hex_elem_dimension(struct device_node *my_node)
 
 	my_child = my_node->child;
 
-	
 	if(!my_child) {
 		printk(KERN_NOTICE "%s don't have child member\n",
 			my_node->name);
@@ -112,6 +111,7 @@ int hex_elem_dimension(struct device_node *my_node)
 					false); 
 				tot_size += strlen(buffer) 
 					+ strlen(my_property->name);
+				kfree(buffer);
 			}else {
 				tot_size += strlen(my_property->name);
 			}
@@ -120,8 +120,6 @@ int hex_elem_dimension(struct device_node *my_node)
 		my_child = my_child->child;
 	}
 
-	if(buffer)
-		kfree(buffer);
 	return tot_size;
 }
 
@@ -186,6 +184,7 @@ int hex_print_elem_string(struct device_node *my_node, struct crypto_shash *alg,
 
 				ret = ret + strlen(buffer) + 
 					strlen(my_property->name);
+				kfree(buffer);
 			} else {
 				memcpy(ret, my_property->name, 
 					strlen(my_property->name));
@@ -195,10 +194,6 @@ int hex_print_elem_string(struct device_node *my_node, struct crypto_shash *alg,
 			my_property = my_property->next;
 		}
 		my_child = my_child->child;
-
-		if(buffer)
-			kfree(buffer);
-		
 	}
 	
 	strcpy(ret, "\0");
@@ -252,6 +247,7 @@ int verify(struct device_node *my_node, struct crypto_shash *alg)
 	if(!digest) {
 		printk(KERN_NOTICE "Error - node [%s] malloc digest\n",
 			my_node->name);
+		kfree(hash);
 		return -ENOMEM;
 	}
 
@@ -284,7 +280,7 @@ int verify(struct device_node *my_node, struct crypto_shash *alg)
 	printk(KERN_NOTICE "Node [%s] DTS hash value %s\n", my_node->name, 
 		dts_hash);
 
-	if(strcmp(dts_hash, digest) == 0 ) {
+	if(strcmp(dts_hash, digest) == 0) {
 		printk(KERN_NOTICE "!! Child node of [%s] verified !!\n", 
 			my_node->name);
 	} else {
@@ -318,10 +314,8 @@ int __init start_module(void)
 	/* END-sha1 */
 
 	/* DTB node section */
-	my_node = of_find_node_by_name(NULL, node_name);
-
 	if(strcmp( node_name, "") == 0 ) {
-		/* take root node */
+		/* take the root node */
 		my_node = of_root->child;
 		while(my_node != NULL) {
 			ret = verify(my_node, alg);
@@ -332,6 +326,7 @@ int __init start_module(void)
 			my_node = my_node->sibling;
 		}
 	} else {
+		my_node = of_find_node_by_name(NULL, node_name);
 		ret = verify(my_node, alg);
 		if(ret < 0) {
 			crypto_free_shash(alg);

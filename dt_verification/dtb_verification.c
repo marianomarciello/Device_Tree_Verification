@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/export.h> /* for THIS_MODULE */
@@ -9,9 +11,8 @@
 #include <crypto/sha.h> /* SHA1_DIGEST_SIZE */
 #include <linux/printk.h> /* hex_dump_to_buffer */
 
-
 /**
- * Command line option 
+ * Command line option
  */
 static char *node_name = "";
 module_param(node_name, charp, 0000);
@@ -24,20 +25,20 @@ struct sdesc {
 	struct shash_desc shash;
 };
 
-/** 
+/**
  * ini_sdesc() - Init the sdesc structure
  * @crypto_shash: cipher handle
- * Return: sdesc initializated 
+ * Return: sdesc initializated
  */
 static struct sdesc *init_sdesc(struct crypto_shash *alg)
 {
 	struct sdesc *sdesc;
 	int size;
+
 	size = sizeof(struct shash_desc) + crypto_shash_descsize(alg);
 	sdesc = kmalloc(size, GFP_KERNEL);
-	if(!sdesc) {
+	if (!sdesc)
 		return ERR_PTR(-ENOMEM);
-	}
 
 	sdesc->shash.tfm = alg;
 	return sdesc;
@@ -56,10 +57,10 @@ static int calc_hash(struct crypto_shash *alg, const unsigned char *data,
 {
 	struct sdesc *sdesc;
 	int ret;
-	
+
 	sdesc = init_sdesc(alg);
-	if(IS_ERR(alg)) {
-		printk(KERN_NOTICE "Error - init_sdesc\n");
+	if (IS_ERR(alg)) {
+		pr_notice("Error - init_sdesc\n")
 		return PTR_ERR(sdesc);
 	}
 
@@ -68,9 +69,8 @@ static int calc_hash(struct crypto_shash *alg, const unsigned char *data,
 	return ret;
 }
 
-
 /**
- * hex_elem_dimension - count number of byte in the node as namevalue char 
+ * hex_elem_dimension - count number of byte in the node as namevalue char
  * array.
  * @my_node: device tree node element
  * Return: number of byte counted on success, <0 if an error occurred.
@@ -84,35 +84,32 @@ int hex_elem_dimension(struct device_node *my_node)
 
 	my_child = my_node->child;
 
-	if(!my_child) {
-		printk(KERN_NOTICE "%s don't have child member\n",
-			my_node->name);
+	if (!my_child) {
+		pr_notice("%s don't have child member\n", my_node->name);
 		return -1;
-	} 
+	}
 
-	while(my_child != NULL) {
+	while (my_child != NULL) {
 		my_property = my_child->properties;
-		while(my_property != NULL ) {
-			if(my_property->length > 0) {
-				buffer = kmalloc(my_property->length*2 
+		while (my_property != NULL) {
+			if (my_property->length > 0) {
+				buffer = kmalloc(my_property->length*2
 					+ my_property->length,
 						GFP_KERNEL);
 				if (!buffer) {
-					printk(KERN_NOTICE 
-						"Error - kmalloc "
-						"my_property->length\n");
+					pr_notice("Error - kmalloc\n");
 					return -ENOMEM;
 				}
 				/* property with value */
-				hex_dump_to_buffer(my_property->value, 
+				hex_dump_to_buffer(my_property->value,
 					my_property->length, 32, 2,
-					buffer, my_property->length*2 
+					buffer, my_property->length*2
 					+ my_property->length,
-					false); 
-				tot_size += strlen(buffer) 
+					false);
+				tot_size += strlen(buffer)
 					+ strlen(my_property->name);
 				kfree(buffer);
-			}else {
+			} else {
 				tot_size += strlen(my_property->name);
 			}
 			my_property = my_property->next;
@@ -125,9 +122,9 @@ int hex_elem_dimension(struct device_node *my_node)
 
 /**
  * hex_print_elem_string - iterate over the subnode of my_node, concatenate all
- * 	value as namevalue and then calculate the hash of this string.
+ * value as namevalue and then calculate the hash of this string.
  * @my_node: parent node with hash property
- * @alg: cipher handle 
+ * @alg: cipher handle
  * @hash: buffer for the digest
  * @tot_size: total number of byte in the subnode property
  * Return: 0 on success; < 0 if an error occurred
@@ -140,53 +137,46 @@ int hex_print_elem_string(struct device_node *my_node, struct crypto_shash *alg,
 	int rr;
 	char *ret, *buffer;
 
-	ret = kmalloc(tot_size, GFP_KERNEL); 
-	if(!ret) {
-		printk(KERN_INFO "HEX: Error - kmalloc(tot_size)\n");
+	ret = kmalloc(tot_size, GFP_KERNEL);
+	if (!ret)
 		return -ENOMEM;
-	}
 
 	my_property = my_node->properties;
 	my_child = my_node->child;
-	
-	if(!my_child) {
-		printk(KERN_NOTICE "HEX: %s don't have "
-			"child member\n", my_node->name);
+	if (!my_child) {
+		pr_notice("HEX: %s no child member\n", my_node->name);
 		kfree(ret);
 		return -ENODATA;
-	} 
+	}
 
-	while(my_child != NULL) {
+	while (my_child != NULL) {
 		my_property = my_child->properties;
 
-		while(my_property != NULL ) {
-			if(my_property->length > 0) {
+		while (my_property != NULL) {
+			if (my_property->length > 0) {
 				buffer = kmalloc(my_property->length*2 +
 					my_property->length,
 						GFP_KERNEL);
-				if (!buffer) {
-					printk(KERN_NOTICE 
-						"HEX: Error - kmalloc "
-						"my_property->length\n");
+				if (!buffer)
 					return -ENOMEM;
-				}
-				hex_dump_to_buffer(my_property->value, 
-					my_property->length, 32, 2,
-					buffer, my_property->length*2 + 
-						my_property->length,
-					false); 
 
-				memcpy(ret, my_property->name, 
+				hex_dump_to_buffer(my_property->value,
+					my_property->length, 32, 2,
+					buffer, my_property->length*2 +
+						my_property->length,
+					false);
+
+				memcpy(ret, my_property->name,
 					strlen(my_property->name));
 				memcpy(ret + strlen(my_property->name),
 					buffer,
 					strlen(buffer));
 
-				ret = ret + strlen(buffer) + 
+				ret = ret + strlen(buffer) +
 					strlen(my_property->name);
 				kfree(buffer);
 			} else {
-				memcpy(ret, my_property->name, 
+				memcpy(ret, my_property->name,
 					strlen(my_property->name));
 				ret = ret + strlen(my_property->name);
 			}
@@ -195,12 +185,10 @@ int hex_print_elem_string(struct device_node *my_node, struct crypto_shash *alg,
 		}
 		my_child = my_child->child;
 	}
-	
+
 	strcpy(ret, "\0");
 	ret = ret - tot_size;
-
 	rr = calc_hash(alg, ret, strlen(ret), hash);
-
 	kfree(ret);
 	return rr;
 }
@@ -220,72 +208,62 @@ int verify(struct device_node *my_node, struct crypto_shash *alg)
 	int ret = 0;
 
 	dts_property = of_find_property(my_node, "hash", 0);
-	if(!dts_property ) {
-		printk(KERN_NOTICE "Error - node [%s] no property hash\n",
-			my_node->name);
+	if (!dts_property) {
+		pr_notice("Error - node [%s] no property hash\n",
+				my_node->name);
 		return 1;
-	} 
+	}
 
 	dts_hash = dts_property->value;
 	tot_size = hex_elem_dimension(my_node);
 
 	if (tot_size <= 0) {
-		printk(KERN_NOTICE "Error - node [%s] hex negative tot_size\n",
-			my_node->name);
-		return -ENODATA; 
+		pr_notice("Error - node [%s] hex negative tot_size\n",
+				my_node->name);
+		return -ENODATA;
 	}
 
 	hash = kmalloc(SHA1_DIGEST_SIZE, GFP_KERNEL);
-	if(!hash) {
-		printk(KERN_NOTICE "Error - node [%s] malloc hash\n",
-			my_node->name);
+	if (!hash)
 		return -ENOMEM;
-	}
+
 	memset(hash, 0, tot_size);
 
 	digest = kmalloc(tot_size, GFP_KERNEL);
-	if(!digest) {
-		printk(KERN_NOTICE "Error - node [%s] malloc digest\n",
-			my_node->name);
+	if (!digest) {
 		kfree(hash);
 		return -ENOMEM;
 	}
 
 	ret = hex_print_elem_string(my_node, alg, hash, tot_size);
-	if(ret){
-		printk(KERN_NOTICE "Error - node [%s] hex_print_elem \n",
-			my_node->name);
+	if (ret) {
+		pr_notice("Error - node [%s] hex_print_elem\n", my_node->name);
 		kfree(digest);
 		kfree(hash);
 		return ret;
 	}
 
-	
-	ret = hex_dump_to_buffer(hash, SHA1_DIGEST_SIZE, 32, 2, digest, 
+	ret = hex_dump_to_buffer(hash, SHA1_DIGEST_SIZE, 32, 2, digest,
 		tot_size, false);
 
-	if(ret != strlen(digest)) {
-		printk(KERN_NOTICE "Error - hex_dump_to_buffer\n");
+	if (ret != strlen(digest)) {
+		pr_notice("Error - hex_dump_to_buffer\n");
 		kfree(digest);
 		kfree(hash);
 		return -ENODATA;
 	}
 
-	printk(KERN_NOTICE "Node [%s] Hash value %s\n", my_node->name,
-		digest);
-	printk(KERN_NOTICE "Node [%s] Hash len %ld\n", my_node->name,
-		strlen(digest));
-	printk(KERN_NOTICE "Node [%s] DTS hash len %ld\n", my_node->name,
-		strlen(dts_hash));
-	printk(KERN_NOTICE "Node [%s] DTS hash value %s\n", my_node->name, 
-		dts_hash);
+	pr_notice("Node [%s] Hash value %s\n", my_node->name, digest);
+	pr_notice("Node [%s] Hash len %ld\n", my_node->name, strlen(digest));
+	pr_notice("Node [%s] DTS hash len %ld\n", my_node->name,
+			strlen(dts_hash));
+	pr_notice("Node [%s] DTS hash value %s\n", my_node->name, dts_hash);
 
-	if(strcmp(dts_hash, digest) == 0) {
-		printk(KERN_NOTICE "!! Child node of [%s] verified !!\n", 
-			my_node->name);
+	if (strcmp(dts_hash, digest) == 0) {
+		pr_notice("!! Child node of [%s] verified !!\n", my_node->name);
 	} else {
-		printk(KERN_NOTICE "ALERT!! child of [%s] node not verified\n",
-			my_node->name);
+		pr_notice("ALERT!! child of [%s] node not verified\n",
+				my_node->name);
 	}
 
 	kfree(digest);
@@ -294,8 +272,8 @@ int verify(struct device_node *my_node, struct crypto_shash *alg)
 }
 
 /**
- * start_module() - this function called when the module is loaded with 
- * 	insmod module.ko
+ * start_module() - this function called when the module is loaded with
+ * insmod module.ko
  * Return: 0 on success; < 0 if an error occurred
  */
 int __init start_module(void)
@@ -307,19 +285,19 @@ int __init start_module(void)
 
 	/* sha1 */
 	alg = crypto_alloc_shash(hash_alg_name, CRYPTO_ALG_TYPE_SHASH, 0);
-	if(IS_ERR(alg)) {
-		printk(KERN_NOTICE "Error - crypto_alloc_shash\n");
+	if (IS_ERR(alg)) {
+		pr_notice("Error - crypto_alloc_shash\n");
 		return PTR_ERR(alg);
 	}
 	/* END-sha1 */
 
 	/* DTB node section */
-	if(strcmp( node_name, "") == 0 ) {
+	if (strcmp(node_name, "") == 0) {
 		/* take the root node */
 		my_node = of_root->child;
-		while(my_node != NULL) {
+		while (my_node != NULL) {
 			ret = verify(my_node, alg);
-			if(ret < 0) {
+			if (ret < 0) {
 				crypto_free_shash(alg);
 				return ret;
 			}
@@ -328,7 +306,7 @@ int __init start_module(void)
 	} else {
 		my_node = of_find_node_by_name(NULL, node_name);
 		ret = verify(my_node, alg);
-		if(ret < 0) {
+		if (ret < 0) {
 			crypto_free_shash(alg);
 			return ret;
 		}
@@ -340,12 +318,12 @@ int __init start_module(void)
 }
 
 /**
- * end_module() - this function is called when the module is removed with 
- * 	rmmod module.ko
+ * end_module() - this function is called when the module is removed with
+ * rmmod module.ko
  */
 void __exit end_module(void)
 {
-	printk(KERN_NOTICE "Removing module\n");
+	pr_notice("Removing module\n");
 }
 
 module_init(start_module);

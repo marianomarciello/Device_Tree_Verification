@@ -60,7 +60,7 @@ static int calc_hash(struct crypto_shash *alg, const unsigned char *data,
 
 	sdesc = init_sdesc(alg);
 	if (IS_ERR(alg)) {
-		pr_notice("Error - init_sdesc\n")
+		pr_notice("Error - init_sdesc\n");
 		return PTR_ERR(sdesc);
 	}
 
